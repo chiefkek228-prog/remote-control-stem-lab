@@ -15,15 +15,9 @@
       --text: #f2f2f2;
       --muted: #8f8f8f;
       --active: #eeeeee;
-      --button: #2b2b2b;
     }
 
-    * {
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; user-select: none; }
     html, body {
       margin: 0;
       min-height: 100%;
@@ -36,9 +30,7 @@
       padding: max(10px, env(safe-area-inset-top)) 10px max(12px, env(safe-area-inset-bottom));
     }
 
-    button, input {
-      font: inherit;
-    }
+    button, input { font: inherit; }
 
     .app {
       width: min(520px, 100%);
@@ -70,9 +62,7 @@
       font-weight: 700;
     }
 
-    .track {
-      margin-top: 8px;
-    }
+    .track { margin-top: 8px; }
 
     .transport {
       margin-top: 17px;
@@ -93,10 +83,7 @@
       text-transform: uppercase;
     }
 
-    .time {
-      font-variant-numeric: tabular-nums;
-      white-space: nowrap;
-    }
+    .time { font-variant-numeric: tabular-nums; white-space: nowrap; }
 
     input[type="range"] {
       -webkit-appearance: none;
@@ -148,9 +135,7 @@
       margin: 4px 0;
     }
 
-    .play-wrap {
-      text-align: center;
-    }
+    .play-wrap { text-align: center; }
 
     .play, .hardware, .sample {
       border: 1px solid #5a5a5a;
@@ -173,9 +158,7 @@
       font-size: 9px;
     }
 
-    .play:active, .hardware:active, .sample:active {
-      transform: translateY(1px);
-    }
+    .play:active, .hardware:active, .sample:active { transform: translateY(1px); }
 
     .mixer {
       display: grid;
@@ -223,7 +206,7 @@
 
     .stem-buttons {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
       gap: 4px;
     }
 
@@ -240,12 +223,6 @@
       border-color: #eeeeee;
     }
 
-    .hardware.muted {
-      background: #080808;
-      color: #ffffff;
-      border-color: #777777;
-    }
-
     .bottom {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -253,9 +230,7 @@
       margin-top: 12px;
     }
 
-    .bottom .hardware {
-      min-height: 38px;
-    }
+    .bottom .hardware { min-height: 38px; }
 
     .sample-wrap {
       margin-top: 12px;
@@ -284,9 +259,7 @@
       line-height: 1.4;
     }
 
-    .error.show {
-      display: block;
-    }
+    .error.show { display: block; }
 
     .help {
       margin-top: 12px;
@@ -295,24 +268,10 @@
     }
 
     @media (max-width: 340px) {
-      .device {
-        padding-left: 10px;
-        padding-right: 10px;
-      }
-
-      .mixer {
-        gap: 4px;
-        padding-left: 4px;
-        padding-right: 4px;
-      }
-
-      .stem-name {
-        font-size: 8px;
-      }
-
-      .stem-slider {
-        width: 98px;
-      }
+      .device { padding-left: 10px; padding-right: 10px; }
+      .mixer { gap: 4px; padding-left: 4px; padding-right: 4px; }
+      .stem-name { font-size: 8px; }
+      .stem-slider { width: 98px; }
     }
   </style>
 </head>
@@ -372,31 +331,23 @@
       };
 
       const SAMPLE_FILE = 'Sample.mp3';
-
       const audio = {};
       const state = {};
       let duration = 0;
       let isPlaying = false;
       let seeking = false;
       let rafId = 0;
-      let muteSnapshot = null;
+      let globalMute = false;
       let sampleAudio = null;
 
       const $ = (id) => document.getElementById(id);
 
       STEMS.forEach(stem => {
-        state[stem.id] = {
-          volume: 1,
-          muted: false,
-          solo: false
-        };
+        state[stem.id] = { volume: 1, solo: false };
       });
 
       if (window.Telegram && window.Telegram.WebApp) {
-        try {
-          window.Telegram.WebApp.ready();
-          window.Telegram.WebApp.expand();
-        } catch (_) {}
+        try { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); } catch (_) {}
       }
 
       function formatTime(value) {
@@ -411,9 +362,9 @@
         $('status').textContent = text;
       }
 
-      function showError(msg) {
+      function showError(message) {
         const el = $('error');
-        el.textContent = msg;
+        el.textContent = message;
         el.classList.add('show');
       }
 
@@ -426,7 +377,7 @@
         return STEMS.some(stem => state[stem.id].solo);
       }
 
-      function updateMix() {
+      function applyMix() {
         const soloActive = anySolo();
 
         STEMS.forEach(stem => {
@@ -434,7 +385,7 @@
           const el = audio[stem.id];
           if (!el) return;
 
-          const shouldMute = item.muted || (soloActive && !item.solo);
+          const shouldMute = globalMute || (soloActive && !item.solo);
           el.volume = shouldMute ? 0 : item.volume;
         });
       }
@@ -447,15 +398,11 @@
 
       function seekAll(value) {
         const safe = Math.max(0, Math.min(Number(value) || 0, duration || 0));
-
         STEMS.forEach(stem => {
           const el = audio[stem.id];
           if (!el) return;
-          try {
-            el.currentTime = safe;
-          } catch (_) {}
+          try { el.currentTime = safe; } catch (_) {}
         });
-
         updateDisplay(safe);
       }
 
@@ -468,17 +415,11 @@
 
       function startAnimation() {
         stopAnimation();
-
         const tick = () => {
           if (!isPlaying) return;
-          if (!seeking) {
-            updateDisplay(audio.vocals.currentTime);
-          }
-          if (!audio.vocals.paused) {
-            rafId = requestAnimationFrame(tick);
-          }
+          if (!seeking) updateDisplay(audio.vocals.currentTime);
+          if (!audio.vocals.paused) rafId = requestAnimationFrame(tick);
         };
-
         rafId = requestAnimationFrame(tick);
       }
 
@@ -503,21 +444,16 @@
         }
 
         const position = master.currentTime || 0;
-
         STEMS.forEach(stem => {
           const el = audio[stem.id];
           if (!el) return;
           try { el.currentTime = position; } catch (_) {}
         });
 
-        updateMix();
+        applyMix();
 
         const result = await Promise.allSettled(
-          STEMS.map(stem => {
-            const el = audio[stem.id];
-            if (!el) return Promise.resolve();
-            return el.play().catch(() => Promise.resolve());
-          })
+          STEMS.map(stem => audio[stem.id].play().catch(() => Promise.resolve()))
         );
 
         const failed = result.some(item => item.status === 'rejected');
@@ -546,7 +482,6 @@
               </div>
               <div id="${stem.id}Value" class="stem-value">100%</div>
               <div class="stem-buttons">
-                <button id="${stem.id}Mute" class="hardware" type="button">MUTE</button>
                 <button id="${stem.id}Solo" class="hardware" type="button">SOLO</button>
               </div>
             </div>
@@ -558,7 +493,6 @@
         STEMS.forEach(stem => {
           const item = state[stem.id];
           const volumeEl = $(stem.id + 'Volume');
-          const muteEl = $(stem.id + 'Mute');
           const soloEl = $(stem.id + 'Solo');
           const valueEl = $(stem.id + 'Value');
 
@@ -566,20 +500,13 @@
             const next = Math.max(0, Math.min(1, Number(event.target.value)));
             item.volume = next;
             valueEl.textContent = Math.round(next * 100) + '%';
-            updateMix();
-          });
-
-          muteEl.addEventListener('click', () => {
-            item.muted = !item.muted;
-            muteEl.classList.toggle('muted', item.muted);
-            muteEl.textContent = item.muted ? 'MUTED' : 'MUTE';
-            updateMix();
+            applyMix();
           });
 
           soloEl.addEventListener('click', () => {
             item.solo = !item.solo;
             soloEl.classList.toggle('active', item.solo);
-            updateMix();
+            applyMix();
           });
         });
       }
@@ -599,7 +526,6 @@
             } else {
               duration = Math.max(duration, el.duration || 0);
             }
-
             $('timeline').max = String(duration || 0);
             updateDisplay(audio.vocals ? audio.vocals.currentTime : 0);
           });
@@ -650,61 +576,26 @@
       }
 
       function muteAllToggle() {
-        if (!muteSnapshot) {
-          muteSnapshot = {};
-
-          STEMS.forEach(stem => {
-            muteSnapshot[stem.id] = state[stem.id].muted;
-            state[stem.id].muted = true;
-
-            const muteEl = $(stem.id + 'Mute');
-            if (muteEl) {
-              muteEl.classList.add('muted');
-              muteEl.textContent = 'MUTED';
-            }
-          });
-
-          $('muteAll').textContent = 'UNMUTE ALL';
-        } else {
-          STEMS.forEach(stem => {
-            state[stem.id].muted = !!muteSnapshot[stem.id];
-
-            const muteEl = $(stem.id + 'Mute');
-            if (muteEl) {
-              muteEl.classList.toggle('muted', state[stem.id].muted);
-              muteEl.textContent = state[stem.id].muted ? 'MUTED' : 'MUTE';
-            }
-          });
-
-          muteSnapshot = null;
-          $('muteAll').textContent = 'MUTE ALL';
-        }
-
-        updateMix();
+        globalMute = !globalMute;
+        $('muteAll').textContent = globalMute ? 'UNMUTE ALL' : 'MUTE ALL';
+        applyMix();
       }
 
       function resetAll() {
         pauseAll();
+        globalMute = false;
+        $('muteAll').textContent = 'MUTE ALL';
 
         STEMS.forEach(stem => {
-          state[stem.id] = { volume: 1, muted: false, solo: false };
-
+          state[stem.id] = { volume: 1, solo: false };
           const volumeEl = $(stem.id + 'Volume');
-          const muteEl = $(stem.id + 'Mute');
           const soloEl = $(stem.id + 'Solo');
           const valueEl = $(stem.id + 'Value');
 
           if (volumeEl) volumeEl.value = '1';
           if (valueEl) valueEl.textContent = '100%';
-          if (muteEl) {
-            muteEl.classList.remove('muted');
-            muteEl.textContent = 'MUTE';
-          }
           if (soloEl) soloEl.classList.remove('active');
         });
-
-        muteSnapshot = null;
-        $('muteAll').textContent = 'MUTE ALL';
 
         if (sampleAudio) {
           sampleAudio.pause();
@@ -717,55 +608,39 @@
         clearError();
         seekAll(0);
         setStatus('READY');
-        updateMix();
+        applyMix();
       }
 
       function bindEvents() {
-        $('play').addEventListener('click', () => {
-          if (isPlaying) {
-            pauseAll();
-          } else {
-            playAll();
-          }
-        });
+        $('play').addEventListener('click', () => isPlaying ? pauseAll() : playAll());
+        $('sampleButton').addEventListener('click', playSample);
+        $('muteAll').addEventListener('click', muteAllToggle);
+        $('reset').addEventListener('click', resetAll);
 
-        $('timeline').addEventListener('pointerdown', () => {
-          seeking = true;
-        });
-
+        $('timeline').addEventListener('pointerdown', () => { seeking = true; });
         $('timeline').addEventListener('input', (event) => {
           const next = Number(event.target.value);
           updateDisplay(next);
-
           STEMS.forEach(stem => {
             const el = audio[stem.id];
             if (!el) return;
-            try {
-              el.currentTime = next;
-            } catch (_) {}
+            try { el.currentTime = next; } catch (_) {}
           });
         });
 
-        $('timeline').addEventListener('pointerup', () => {
-          seeking = false;
-          seekAll($('timeline').value);
+        ['pointerup', 'change'].forEach(type => {
+          $('timeline').addEventListener(type, () => {
+            seeking = false;
+            seekAll($('timeline').value);
+          });
         });
-
-        $('timeline').addEventListener('change', () => {
-          seeking = false;
-          seekAll($('timeline').value);
-        });
-
-        $('muteAll').addEventListener('click', muteAllToggle);
-        $('reset').addEventListener('click', resetAll);
-        $('sampleButton').addEventListener('click', playSample);
       }
 
       renderMixer();
       createAudioElements();
       bindEvents();
       updateDisplay(0);
-      updateMix();
+      applyMix();
     })();
   </script>
 </body>
