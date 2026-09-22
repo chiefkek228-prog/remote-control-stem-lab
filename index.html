@@ -242,31 +242,66 @@
   }
 
   async function playAll() {
-    if (!masterReady) {
-      setStatus("LOADING…");
-      try {
-        await Promise.all(tracks.map(t => audio.get(t.id).play()));
-        setStatus("PLAYING", "playing");
-        playBtn.textContent = "PAUSE";
-      } catch (err) {
-        setStatus("READY", "ready");
-        showError("The browser blocked playback until a user gesture. Tap PLAY again, or check that all four MP3 files are in the repository root.");
-      }
-      return;
-    }
+    const master = audio.get("vocals");
+    if (!master) return;
+
     try {
+      setStatus("LOADING…");
+
+      // Wait only for metadata/readiness; playback itself is triggered directly
+      // from the user's PLAY tap. Safari/iOS is stricter about this than desktop browsers.
       const pos = currentPosition();
+
       for (const t of tracks) {
         const a = audio.get(t.id);
-        if (a && Math.abs(a.currentTime - pos) > 0.03) a.currentTime = pos;
+        if (!a) continue;
+        try { a.pause(); } catch (_) {}
+        try { a.currentTime = pos; } catch (_) {}
       }
-      await Promise.all(tracks.map(t => audio.get(t.id).play()));
-      setStatus("PLAYING", "playing");
-      playBtn.textContent = "PAUSE";
-      startClock();
+
+      applyMix();
+
+      // Call play() immediately for every track from the same user gesture.
+      // We do not wait for one play() promise before starting the next.
+      const attempts = tracks.map(t => {
+        const a = audio.get(t.id);
+        return a ? a.play() : Promise.reject(new Error("missing audio"));
+      });
+
+      const results = await Promise.allSettled(attempts);
+      const failed = results.some(r => r.status === "rejected");
+
+      if (failed) {
+        // One more direct synchronization/start attempt. This is useful on
+        // iOS Safari when a media element has just finished loading.
+        for (const t of tracks) {
+          const a = audio.get(t.id);
+          if (a && a.paused) {
+            try { await a.play(); } catch (_) {}
+          }
+        }
+      }
+
+      const playingCount = tracks.filter(t => {
+        const a = audio.get(t.id);
+        return a && !a.paused;
+      }).length;
+
+      if (playingCount === tracks.length) {
+        setStatus("PLAYING", "playing");
+        playBtn.textContent = "PAUSE";
+        startClock();
+      } else {
+        for (const t of tracks) {
+          const a = audio.get(t.id);
+          if (a) a.pause();
+        }
+        setStatus("READY", "ready");
+        showError("Playback was blocked by the browser. Tap PLAY once more. If it still fails, check that all four MP3 files are in the repository root and open the page directly in Safari first.");
+      }
     } catch (_) {
       setStatus("READY", "ready");
-      showError("Could not start all four audio files. Make sure vocals.mp3, drums.mp3, bass.mp3 and other.mp3 exist in the same folder as index.html.");
+      showError("Could not start the four audio files. Check that vocals.mp3, drums.mp3, bass.mp3 and other.mp3 are in the same folder as index.html.");
     }
   }
 
