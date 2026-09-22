@@ -1,52 +1,659 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<meta name="theme-color" content="#090909">
-<title>REMOTE CONTROL — STEM LAB</title>
-<script src="https://telegram.org/js/telegram-web-app.js"></script>
-<style>
-:root{--bg:#090909;--panel:#151515;--line:#333;--text:#f5f5f5;--muted:#999;--white:#eee}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}body{padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom))}.app{width:min(760px,100%);margin:auto}.header{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px}.eyebrow,.sub{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}.eyebrow{margin-bottom:8px}h1{margin:0;font-size:clamp(34px,9vw,64px);line-height:.88;letter-spacing:-.07em}.sub{margin-top:10px}.top{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:11px;letter-spacing:.12em}.time{font-variant-numeric:tabular-nums;white-space:nowrap}#timeline{display:block;width:100%;height:40px;margin:4px 0 10px}.button,.mini{border:1px solid var(--line);border-radius:9px;background:#181818;color:var(--text);font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}.button{width:100%;min-height:48px;font-size:11px}.button.primary{background:var(--white);border-color:var(--white);color:#070707}.transport{margin-bottom:16px}.stems{display:grid;gap:9px}.stem{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}.stem-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px}.label{font-size:12px;font-weight:700;letter-spacing:.1em}.value{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}.controls{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px}.volume{width:100%;height:36px}.mini{min-width:64px;min-height:42px;padding:0 7px;font-size:9px}.mini.active{background:var(--white);border-color:var(--white);color:#070707}.mini.muted{background:#333}.bottom{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.error{display:none;margin-top:12px;border:1px solid var(--line);border-radius:8px;padding:10px;color:#ddd;font-size:11px;line-height:1.45}.error.show{display:block}.note{text-align:center;color:#555;font-size:10px;letter-spacing:.12em;margin-top:12px;text-transform:uppercase}input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;touch-action:pan-y;cursor:pointer}input[type=range]::-webkit-slider-runnable-track{height:4px;background:#4a4a4a;border-radius:4px}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border:0;border-radius:50%;background:#f5f5f5;margin-top:-9px}input[type=range]::-moz-range-track{height:4px;background:#4a4a4a}input[type=range]::-moz-range-thumb{width:22px;height:22px;border:0;border-radius:50%;background:#f5f5f5}@media(max-width:360px){.mini{min-width:56px;padding:0 5px}.label{font-size:11px}}
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#090909" />
+  <title>REMOTE CONTROL — STEM LAB</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <style>
+    :root {
+      --bg: #090909;
+      --panel: #121212;
+      --line: #2d2d2d;
+      --text: #f4f4f4;
+      --muted: #8f8f8f;
+      --white: #f1f1f1;
+      --button: #181818;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body {
+      margin: 0;
+      min-height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    }
+    body {
+      padding: max(14px, env(safe-area-inset-top)) 14px max(14px, env(safe-area-inset-bottom));
+    }
+    button, input {
+      font: inherit;
+    }
+    .app {
+      width: min(760px, 100%);
+      margin: 0 auto;
+    }
+    .header {
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+    h1 {
+      margin: 0;
+      font-size: clamp(2.1rem, 7vw, 4.2rem);
+      line-height: 0.88;
+      letter-spacing: -0.07em;
+      font-weight: 700;
+    }
+    .subhead {
+      margin-top: 10px;
+      font-size: 11px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .status-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 20px;
+      margin-bottom: 12px;
+    }
+    .status {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+    }
+    .status.ready { color: #d9d9d9; }
+    .status.playing { color: #ffffff; }
+    .status.paused { color: #d1d1d1; }
+    .time {
+      font-size: 12px;
+      letter-spacing: 0.04em;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 32px;
+      background: transparent;
+      cursor: pointer;
+      touch-action: pan-y;
+    }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 3px;
+      background: #3c3c3c;
+      border-radius: 3px;
+    }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #f5f5f5;
+      border: 0;
+      margin-top: -7.5px;
+    }
+    input[type="range"]::-moz-range-track {
+      height: 3px;
+      background: #3c3c3c;
+      border-radius: 3px;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #f5f5f5;
+      border: 0;
+    }
+    .transport {
+      margin-bottom: 16px;
+    }
+    .button {
+      width: 100%;
+      min-height: 48px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: var(--button);
+      color: var(--text);
+      padding: 0 12px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .button.primary {
+      background: var(--white);
+      color: #111111;
+      border-color: var(--white);
+    }
+    .stem-list {
+      display: grid;
+      gap: 10px;
+    }
+    .stem {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px;
+    }
+    .stem-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 8px;
+    }
+    .stem-name {
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .stem-value {
+      color: var(--muted);
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+    .stem-controls {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto auto;
+      align-items: center;
+      gap: 8px;
+    }
+    .mini {
+      min-height: 40px;
+      min-width: 62px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #1a1a1a;
+      color: var(--text);
+      padding: 0 8px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .mini.active {
+      background: var(--white);
+      color: #0a0a0a;
+      border-color: var(--white);
+    }
+    .mini.muted {
+      background: #2d2d2d;
+      border-color: #2d2d2d;
+    }
+    .bottom-controls {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 18px;
+    }
+    .error {
+      display: none;
+      margin-top: 12px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #101010;
+      color: #ddd;
+      padding: 10px 12px;
+      font-size: 11px;
+      line-height: 1.45;
+    }
+    .error.show {
+      display: block;
+    }
+    .footer-note {
+      text-align: center;
+      margin-top: 12px;
+      color: #5a5a5a;
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    @media (max-width: 360px) {
+      .mini {
+        min-width: 56px;
+        padding: 0 6px;
+      }
+      .stem-name {
+        font-size: 11px;
+      }
+    }
+  </style>
 </head>
 <body>
-<main class="app">
-<header class="header"><div class="eyebrow">YE / DONDA</div><h1>REMOTE CONTROL</h1><div class="sub">STEM LAB · REMOTE CONTROL — 2021</div></header>
-<section><div class="top"><span id="status">READY</span><span id="time" class="time">00:00 / 00:00</span></div><input id="timeline" type="range" min="0" max="0" step="0.01" value="0" aria-label="Shared timeline"><div class="transport"><button id="play" class="button primary" type="button">PLAY</button></div></section>
-<section id="stems" class="stems" aria-label="Stem controls"></section>
-<div class="bottom"><button id="muteAll" class="button" type="button">MUTE ALL</button><button id="reset" class="button" type="button">RESET</button></div>
-<div id="error" class="error" role="alert"></div><div class="note">4-STEM SYNCHRONIZED PLAYER</div>
-</main>
-<script>
-(function(){
-'use strict';
-const AUDIO_FILES={vocals:'Vocals.mp3',drums:'Drums.mp3',bass:'Bass.mp3',other:'Other.mp3'};
-const STEMS=[{id:'vocals',label:'🎤 VOCALS'},{id:'drums',label:'🥁 DRUMS'},{id:'bass',label:'🔊 BASS'},{id:'other',label:'🎹 OTHER'}];
-const audio={};const state={};let duration=0;let isPlaying=false;let animation=0;let seeking=false;let muteBackup=null;
-const byId=function(id){return document.getElementById(id)};
-STEMS.forEach(function(s){state[s.id]={volume:1,muted:false,solo:false}});
-const telegram=window.Telegram&&window.Telegram.WebApp;if(telegram){try{telegram.ready();telegram.expand()}catch(e){}}
-function formatTime(value){var n=Number.isFinite(value)?Math.max(0,value):0;var seconds=Math.floor(n);return String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0')}
-function setStatus(value){byId('status').textContent=value}
-function showError(value){byId('error').textContent=value;byId('error').classList.add('show')}
-function clearError(){byId('error').textContent='';byId('error').classList.remove('show')}
-function anySolo(){return STEMS.some(function(s){return state[s.id].solo})}
-function updateMix(){var solo=anySolo();STEMS.forEach(function(s){var m=state[s.id];if(audio[s.id])audio[s.id].volume=(m.muted||(solo&&!m.solo))?0:m.volume})}
-function updateDisplay(value){var n=Math.max(0,Math.min(Number(value)||0,duration||0));byId('timeline').value=String(n);byId('time').textContent=formatTime(n)+' / '+formatTime(duration)}
-function seekAll(value){var n=Math.max(0,Math.min(Number(value)||0,duration||0));STEMS.forEach(function(s){try{audio[s.id].currentTime=n}catch(e){}});updateDisplay(n)}
-function makeControls(){var html='';STEMS.forEach(function(s){html+='<article class="stem"><div class="stem-head"><span class="label">'+s.label+'</span><span id="'+s.id+'-value" class="value">100%</span></div><div class="controls"><input id="'+s.id+'-volume" class="volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="'+s.label+' volume"><button id="'+s.id+'-mute" class="mini" type="button">MUTE</button><button id="'+s.id+'-solo" class="mini" type="button">SOLO</button></div></article>'});byId('stems').innerHTML=html;STEMS.forEach(bindStemControls)}
-function bindStemControls(s){var m=state[s.id];var slider=byId(s.id+'-volume');var mute=byId(s.id+'-mute');var solo=byId(s.id+'-solo');slider.addEventListener('input',function(){m.volume=Number(slider.value);byId(s.id+'-value').textContent=Math.round(m.volume*100)+'%';updateMix()});slider.addEventListener('change',function(){m.volume=Number(slider.value);updateMix()});mute.addEventListener('click',function(){m.muted=!m.muted;mute.classList.toggle('muted',m.muted);mute.textContent=m.muted?'MUTED':'MUTE';updateMix()});solo.addEventListener('click',function(){m.solo=!m.solo;solo.classList.toggle('active',m.solo);updateMix()})}
-function stopClock(){if(animation)cancelAnimationFrame(animation);animation=0}
-function startClock(){stopClock();function frame(){if(!isPlaying)return;if(!seeking)updateDisplay(audio.vocals.currentTime);if(!audio.vocals.paused)animation=requestAnimationFrame(frame)}animation=requestAnimationFrame(frame)}
-function pauseAll(){STEMS.forEach(function(s){if(audio[s.id])audio[s.id].pause()});isPlaying=false;byId('play').textContent='PLAY';setStatus('PAUSED');stopClock()}
-function playAll(){var position=audio.vocals.currentTime;STEMS.forEach(function(s){try{audio[s.id].currentTime=position}catch(e){}});updateMix();var attempts=STEMS.map(function(s){return audio[s.id].play()});Promise.all(attempts).then(function(){isPlaying=true;byId('play').textContent='PAUSE';setStatus('PLAYING');clearError();startClock()}).catch(function(){pauseAll();showError('Playback could not start. Check the four MP3 files.')})}
-function createAudio(){STEMS.forEach(function(s){var a=new Audio();a.src=AUDIO_FILES[s.id];a.preload='auto';a.playsInline=true;a.setAttribute('playsinline','');audio[s.id]=a;a.addEventListener('loadedmetadata',function(){if(s.id==='vocals')duration=a.duration;else duration=Math.max(duration,a.duration);byId('timeline').max=String(duration);updateDisplay(audio.vocals.currentTime)});a.addEventListener('error',function(){showError('Could not load: '+AUDIO_FILES[s.id])});a.addEventListener('ended',function(){if(s.id==='vocals'){pauseAll();seekAll(duration);setStatus('ENDED')}})})}
-byId('play').addEventListener('click',function(){if(isPlaying)pauseAll();else playAll()});byId('timeline').addEventListener('pointerdown',function(){seeking=true});byId('timeline').addEventListener('input',function(){var value=Number(byId('timeline').value);updateDisplay(value);STEMS.forEach(function(s){try{audio[s.id].currentTime=value}catch(e){}})});byId('timeline').addEventListener('change',function(){seeking=false;seekAll(byId('timeline').value)});byId('timeline').addEventListener('pointerup',function(){seeking=false;seekAll(byId('timeline').value)});
-byId('muteAll').addEventListener('click',function(){if(!muteBackup){muteBackup={};STEMS.forEach(function(s){muteBackup[s.id]=state[s.id].muted;state[s.id].muted=true;byId(s.id+'-mute').classList.add('muted');byId(s.id+'-mute').textContent='MUTED'});byId('muteAll').textContent='UNMUTE ALL'}else{STEMS.forEach(function(s){state[s.id].muted=!!muteBackup[s.id];byId(s.id+'-mute').classList.toggle('muted',state[s.id].muted);byId(s.id+'-mute').textContent=state[s.id].muted?'MUTED':'MUTE'});muteBackup=null;byId('muteAll').textContent='MUTE ALL'}updateMix()});
-byId('reset').addEventListener('click',function(){pauseAll();STEMS.forEach(function(s){state[s.id]={volume:1,muted:false,solo:false};byId(s.id+'-volume').value='1';byId(s.id+'-value').textContent='100%';byId(s.id+'-mute').className='mini';byId(s.id+'-mute').textContent='MUTE';byId(s.id+'-solo').className='mini'});muteBackup=null;byId('muteAll').textContent='MUTE ALL';clearError();seekAll(0);setStatus('READY');updateMix()});
-makeControls();createAudio();updateDisplay(0);updateMix();
-})();
-</script>
+  <main class="app">
+    <header class="header">
+      <div class="eyebrow">Ye / Donda</div>
+      <h1>REMOTE CONTROL</h1>
+      <div class="subhead">STEM LAB · REMOTE CONTROL — 2021</div>
+    </header>
+
+    <section aria-label="Main transport">
+      <div class="status-row">
+        <div id="status" class="status ready">READY</div>
+        <div id="time" class="time">00:00 / 00:00</div>
+      </div>
+
+      <input id="timeline" type="range" min="0" max="0" step="0.01" value="0" aria-label="Shared timeline" />
+
+      <div class="transport">
+        <button id="play" class="button primary" type="button">PLAY</button>
+      </div>
+    </section>
+
+    <section id="stems" class="stem-list" aria-label="Stem controls"></section>
+
+    <div class="bottom-controls">
+      <button id="muteAll" class="button" type="button">MUTE ALL</button>
+      <button id="reset" class="button" type="button">RESET</button>
+    </div>
+
+    <div id="error" class="error" role="alert" aria-live="assertive"></div>
+    <div class="footer-note">4-STEM SYNCHRONIZED PLAYER</div>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const AUDIO_FILES = {
+        vocals: 'Vocals.mp3',
+        drums: 'Drums.mp3',
+        bass: 'Bass.mp3',
+        other: 'Other.mp3'
+      };
+
+      const STEMS = [
+        { id: 'vocals', label: '🎤 VOCALS' },
+        { id: 'drums', label: '🥁 DRUMS' },
+        { id: 'bass', label: '🔊 BASS' },
+        { id: 'other', label: '🎹 OTHER' }
+      ];
+
+      const audio = {};
+      const gains = {};
+      const state = {};
+      let audioCtx = null;
+      let duration = 0;
+      let isPlaying = false;
+      let rafId = 0;
+      let seeking = false;
+      let muteSnapshot = null;
+
+      const $ = (id) => document.getElementById(id);
+
+      STEMS.forEach((stem) => {
+        state[stem.id] = { volume: 1, muted: false, solo: false };
+      });
+
+      const tg = window.Telegram && window.Telegram.WebApp;
+      if (tg) {
+        try {
+          tg.ready();
+          tg.expand();
+        } catch (_) {}
+      }
+
+      function formatTime(value) {
+        const safe = Number.isFinite(value) ? Math.max(0, value) : 0;
+        const totalSeconds = Math.floor(safe);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return String(minutes).padStart(2, '0') + ':' + String(seconds).padStart(2, '0');
+      }
+
+      function setStatus(text, klass = '') {
+        const el = $('status');
+        el.textContent = text;
+        el.className = 'status ' + klass;
+      }
+
+      function showError(message) {
+        const el = $('error');
+        el.textContent = message;
+        el.classList.add('show');
+      }
+
+      function clearError() {
+        const el = $('error');
+        el.textContent = '';
+        el.classList.remove('show');
+      }
+
+      function anySolo() {
+        return STEMS.some((stem) => state[stem.id].solo);
+      }
+
+      function applyMix() {
+        const soloActive = anySolo();
+
+        STEMS.forEach((stem) => {
+          const trackState = state[stem.id];
+          const gainNode = gains[stem.id];
+          const element = audio[stem.id];
+
+          if (!gainNode) {
+            if (element) {
+              element.volume = (trackState.muted || (soloActive && !trackState.solo)) ? 0 : trackState.volume;
+            }
+            return;
+          }
+
+          const shouldMute = trackState.muted || (soloActive && !trackState.solo);
+          gainNode.gain.value = shouldMute ? 0 : trackState.volume;
+        });
+      }
+
+      function updateTimelineDisplay(value) {
+        const safe = Math.max(0, Math.min(Number(value) || 0, duration || 0));
+        $('timeline').value = String(safe);
+        $('time').textContent = formatTime(safe) + ' / ' + formatTime(duration);
+      }
+
+      function seekAll(value) {
+        const target = Math.max(0, Math.min(Number(value) || 0, duration || 0));
+        STEMS.forEach((stem) => {
+          const el = audio[stem.id];
+          if (!el) return;
+          try {
+            el.currentTime = target;
+          } catch (_) {}
+        });
+        updateTimelineDisplay(target);
+      }
+
+      function stopAnimation() {
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = 0;
+        }
+      }
+
+      function startAnimation() {
+        stopAnimation();
+        const tick = () => {
+          if (!isPlaying || !audio.vocals) return;
+          if (!seeking) {
+            updateTimelineDisplay(audio.vocals.currentTime);
+          }
+          if (!audio.vocals.paused) {
+            rafId = requestAnimationFrame(tick);
+          }
+        };
+        rafId = requestAnimationFrame(tick);
+      }
+
+      function ensureAudioContext() {
+        if (!audioCtx) {
+          const AudioCtx = window.AudioContext || window.webkitAudioContext;
+          if (!AudioCtx) return null;
+          audioCtx = new AudioCtx();
+        }
+
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume().catch(() => {});
+        }
+
+        STEMS.forEach((stem) => {
+          const element = audio[stem.id];
+          if (!element) return;
+          if (gains[stem.id]) return;
+
+          const source = audioCtx.createMediaElementSource(element);
+          const gainNode = audioCtx.createGain();
+          source.connect(gainNode);
+          gainNode.connect(audioCtx.destination);
+          gains[stem.id] = gainNode;
+        });
+
+        return audioCtx;
+      }
+
+      function pauseAll() {
+        STEMS.forEach((stem) => {
+          const el = audio[stem.id];
+          if (!el) return;
+          try {
+            el.pause();
+          } catch (_) {}
+        });
+        isPlaying = false;
+        $('play').textContent = 'PLAY';
+        setStatus('PAUSED', 'paused');
+        stopAnimation();
+      }
+
+      async function playAll() {
+        const master = audio.vocals;
+        if (!master) {
+          showError('Could not load: ' + AUDIO_FILES.vocals);
+          return;
+        }
+
+        ensureAudioContext();
+
+        const position = master.currentTime || 0;
+        STEMS.forEach((stem) => {
+          const el = audio[stem.id];
+          if (!el) return;
+          try {
+            el.currentTime = position;
+          } catch (_) {}
+        });
+
+        applyMix();
+
+        const result = await Promise.allSettled(
+          STEMS.map((stem) => {
+            const el = audio[stem.id];
+            if (!el) return Promise.resolve();
+            return el.play().catch(() => Promise.resolve());
+          })
+        );
+
+        const failed = result.some((item) => item.status === 'rejected');
+        if (failed) {
+          pauseAll();
+          showError('Playback failed. Tap PLAY again.');
+          return;
+        }
+
+        isPlaying = true;
+        $('play').textContent = 'PAUSE';
+        setStatus('PLAYING', 'playing');
+        clearError();
+        startAnimation();
+      }
+
+      function renderStems() {
+        const container = $('stems');
+        container.innerHTML = STEMS.map((stem) => `
+          <article class="stem">
+            <div class="stem-head">
+              <div class="stem-name">${stem.label}</div>
+              <div id="${stem.id}Value" class="stem-value">100%</div>
+            </div>
+            <div class="stem-controls">
+              <input id="${stem.id}Volume" class="stem-slider" type="range" min="0" max="1" step="0.01" value="1" aria-label="${stem.label} volume" />
+              <button id="${stem.id}Mute" class="mini" type="button">MUTE</button>
+              <button id="${stem.id}Solo" class="mini" type="button">SOLO</button>
+            </div>
+          </article>
+        `).join('');
+
+        STEMS.forEach((stem) => {
+          const trackState = state[stem.id];
+          const volumeEl = $(stem.id + 'Volume');
+          const muteEl = $(stem.id + 'Mute');
+          const soloEl = $(stem.id + 'Solo');
+          const valueEl = $(stem.id + 'Value');
+
+          volumeEl.addEventListener('input', (event) => {
+            const next = Number(event.target.value);
+            trackState.volume = next;
+            valueEl.textContent = Math.round(next * 100) + '%';
+            applyMix();
+          });
+
+          muteEl.addEventListener('click', () => {
+            trackState.muted = !trackState.muted;
+            muteEl.classList.toggle('muted', trackState.muted);
+            muteEl.textContent = trackState.muted ? 'MUTED' : 'MUTE';
+            applyMix();
+          });
+
+          soloEl.addEventListener('click', () => {
+            trackState.solo = !trackState.solo;
+            soloEl.classList.toggle('active', trackState.solo);
+            applyMix();
+          });
+        });
+      }
+
+      function createAudioElements() {
+        STEMS.forEach((stem) => {
+          const el = new Audio();
+          el.src = AUDIO_FILES[stem.id];
+          el.preload = 'auto';
+          el.playsInline = true;
+          el.setAttribute('playsinline', 'true');
+          audio[stem.id] = el;
+
+          el.addEventListener('loadedmetadata', () => {
+            if (!Number.isFinite(el.duration) || el.duration <= 0) return;
+            if (stem.id === 'vocals') {
+              duration = el.duration;
+            } else {
+              duration = Math.max(duration, el.duration);
+            }
+            $('timeline').max = String(duration || 0);
+            updateTimelineDisplay(audio.vocals ? audio.vocals.currentTime : 0);
+          });
+
+          el.addEventListener('error', () => {
+            showError('Could not load: ' + AUDIO_FILES[stem.id]);
+          });
+
+          el.addEventListener('ended', () => {
+            if (stem.id === 'vocals') {
+              pauseAll();
+              seekAll(duration);
+              setStatus('ENDED');
+            }
+          });
+        });
+      }
+
+      function muteAllToggle() {
+        if (!muteSnapshot) {
+          muteSnapshot = {};
+          STEMS.forEach((stem) => {
+            muteSnapshot[stem.id] = state[stem.id].muted;
+            state[stem.id].muted = true;
+            $(stem.id + 'Mute').classList.add('muted');
+            $(stem.id + 'Mute').textContent = 'MUTED';
+          });
+          $('muteAll').textContent = 'UNMUTE ALL';
+        } else {
+          STEMS.forEach((stem) => {
+            state[stem.id].muted = !!muteSnapshot[stem.id];
+            const muteButton = $(stem.id + 'Mute');
+            muteButton.classList.toggle('muted', state[stem.id].muted);
+            muteButton.textContent = state[stem.id].muted ? 'MUTED' : 'MUTE';
+          });
+          muteSnapshot = null;
+          $('muteAll').textContent = 'MUTE ALL';
+        }
+        applyMix();
+      }
+
+      function resetAll() {
+        pauseAll();
+
+        STEMS.forEach((stem) => {
+          state[stem.id] = { volume: 1, muted: false, solo: false };
+          $(stem.id + 'Volume').value = '1';
+          $(stem.id + 'Value').textContent = '100%';
+          const muteButton = $(stem.id + 'Mute');
+          muteButton.classList.remove('muted');
+          muteButton.textContent = 'MUTE';
+          const soloButton = $(stem.id + 'Solo');
+          soloButton.classList.remove('active');
+        });
+
+        muteSnapshot = null;
+        $('muteAll').textContent = 'MUTE ALL';
+        clearError();
+        seekAll(0);
+        setStatus('READY', 'ready');
+        applyMix();
+      }
+
+      function bindEvents() {
+        $('play').addEventListener('click', () => {
+          if (isPlaying) {
+            pauseAll();
+          } else {
+            playAll();
+          }
+        });
+
+        $('timeline').addEventListener('pointerdown', () => {
+          seeking = true;
+        });
+
+        $('timeline').addEventListener('input', (event) => {
+          const next = Number(event.target.value);
+          updateTimelineDisplay(next);
+          STEMS.forEach((stem) => {
+            const el = audio[stem.id];
+            if (!el) return;
+            try {
+              el.currentTime = next;
+            } catch (_) {}
+          });
+        });
+
+        $('timeline').addEventListener('pointerup', () => {
+          seeking = false;
+          seekAll($('timeline').value);
+        });
+
+        $('timeline').addEventListener('change', () => {
+          seeking = false;
+          seekAll($('timeline').value);
+        });
+
+        $('muteAll').addEventListener('click', muteAllToggle);
+        $('reset').addEventListener('click', resetAll);
+      }
+
+      renderStems();
+      createAudioElements();
+      bindEvents();
+      updateTimelineDisplay(0);
+      applyMix();
+    })();
+  </script>
 </body>
 </html>
