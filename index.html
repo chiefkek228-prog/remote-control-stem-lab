@@ -1,37 +1,350 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#080808"><title>REMOTE CONTROL — STEM LAB</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080808">
+<title>REMOTE CONTROL — STEM LAB</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{--bg:#080808;--device:#171717;--well:#0d0d0d;--line:#383838;--text:#e8e8e8;--muted:#929292}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}body{padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom))}.app{width:min(520px,100%);margin:auto}.device{background:var(--device);border:1px solid #444;border-radius:7px;padding:18px 14px 14px;box-shadow:0 7px #030303,0 15px 30px #000}.brand,.track,.help{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-align:center}.model{text-align:center;margin-top:7px;font-size:20px;line-height:1;letter-spacing:.13em;font-weight:700}.track{margin-top:8px}.transport{margin-top:17px;padding:10px;background:var(--well);border:1px solid #303030;border-radius:3px}.status-row{display:flex;justify-content:space-between;color:var(--muted);font-size:9px;letter-spacing:.14em}.time{font-variant-numeric:tabular-nums}.timeline{display:block;width:100%;height:30px;margin:4px 0}.play-wrap{text-align:center}.play,.hardware,.sample{border:1px solid #5a5a5a;border-radius:3px;background:linear-gradient(#373737,#1b1b1b);color:#ddd;box-shadow:inset 0 1px #555,0 2px #050505;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}.play{width:70px;height:32px;background:#d9d9d9;color:#111;border-color:#eee;font-size:9px}.play:active,.hardware:active,.sample:active{transform:translateY(1px)}.mixer{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;padding:13px 8px 11px;background:var(--well);border:1px solid #303030;border-radius:3px}.stem{text-align:center;min-width:0}.stem-name{font-size:9px;letter-spacing:.08em;color:#c7c7c7}.stem-value{font-size:9px;color:var(--muted);margin:3px 0;font-variant-numeric:tabular-nums}.stem-slider{display:block;width:112px;height:28px;margin:40px auto;transform:rotate(-90deg);touch-action:none}.stem-slider::-webkit-slider-runnable-track{height:4px;background:#414141;border:1px solid #666}.stem-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-9px;border:1px solid #eee;border-radius:2px;background:#c8c8c8}.stem-slider::-moz-range-track{height:4px;background:#414141}.stem-slider::-moz-range-thumb{width:20px;height:20px;border:1px solid #eee;border-radius:2px;background:#c8c8c8}.stem-buttons{display:grid;gap:6px}.hardware{width:100%;min-height:31px;font-size:8px}.hardware.active{background:#ddd;color:#111;border-color:#eee}.hardware.muted{background:#080808;color:#fff;border-color:#777}.bottom{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.bottom .hardware{min-height:38px}.sample-wrap{margin-top:12px;padding-top:11px;border-top:1px solid #303030}.sample{width:100%;min-height:43px;font-size:9px}.sample.active{background:#ddd;color:#111}.error{display:none;margin-top:10px;padding:8px;border:1px solid #555;color:#ddd;font-size:10px}.error.show{display:block}.help{margin-top:12px;color:#555;line-height:1.5}@media(max-width:340px){.device{padding-left:10px;padding-right:10px}.stem-slider{width:106px}.mixer{gap:4px}.stem-name{font-size:8px}}
+:root{--bg:#080808;--device:#171717;--well:#0d0d0d;--line:#383838;--text:#e8e8e8;--muted:#929292}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+body{padding:max(10px,env(safe-area-inset-top)) 10px max(10px,env(safe-area-inset-bottom))}
+.app{width:min(520px,100%);margin:auto}
+.device{background:var(--device);border:1px solid #444;border-radius:7px;padding:18px 14px 14px;box-shadow:0 7px #030303,0 15px 30px #000}
+.brand,.track,.help{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);text-align:center}
+.model{text-align:center;margin-top:7px;font-size:20px;line-height:1;letter-spacing:.13em;font-weight:700}
+.track{margin-top:8px}
+.transport{margin-top:17px;padding:10px;background:var(--well);border:1px solid #303030;border-radius:3px}
+.status-row{display:flex;justify-content:space-between;color:var(--muted);font-size:9px;letter-spacing:.14em}
+.time{font-variant-numeric:tabular-nums}
+.timeline{display:block;width:100%;height:30px;margin:4px 0}
+.play-wrap{text-align:center}
+.play,.hardware,.sample{border:1px solid #5a5a5a;border-radius:3px;background:linear-gradient(#373737,#1b1b1b);color:#ddd;box-shadow:inset 0 1px #555,0 2px #050505;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer}
+.play{width:70px;height:32px;background:#d9d9d9;color:#111;border-color:#eee;font-size:9px}
+.play:active,.hardware:active,.sample:active{transform:translateY(1px)}
+.mixer{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;padding:13px 8px 11px;background:var(--well);border:1px solid #303030;border-radius:3px}
+.stem{text-align:center;min-width:0}
+.stem-name{font-size:9px;letter-spacing:.08em;color:#c7c7c7}
+.stem-value{font-size:9px;color:var(--muted);margin:3px 0;font-variant-numeric:tabular-nums}
+.stem-slider{display:block;width:112px;height:28px;margin:40px auto;transform:rotate(-90deg);touch-action:none}
+.stem-slider::-webkit-slider-runnable-track{height:4px;background:#414141;border:1px solid #666}
+.stem-slider::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;margin-top:-9px;border:1px solid #eee;border-radius:2px;background:#c8c8c8}
+.stem-slider::-moz-range-track{height:4px;background:#414141}
+.stem-slider::-moz-range-thumb{width:20px;height:20px;border:1px solid #eee;border-radius:2px;background:#c8c8c8}
+.stem-buttons{display:grid;gap:6px}
+.hardware{width:100%;min-height:31px;font-size:8px}
+.hardware.active{background:#ddd;color:#111;border-color:#eee}
+.hardware.muted{background:#080808;color:#fff;border-color:#777}
+.bottom{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}
+.bottom .hardware{min-height:38px}
+.sample-wrap{margin-top:12px;padding-top:11px;border-top:1px solid #303030}
+.sample{width:100%;min-height:43px;font-size:9px}
+.sample.active{background:#ddd;color:#111}
+.error{display:none;margin-top:10px;padding:8px;border:1px solid #555;color:#ddd;font-size:10px}.error.show{display:block}
+.help{margin-top:12px;color:#555;line-height:1.5}
+@media(max-width:340px){.device{padding-left:10px;padding-right:10px}.stem-slider{width:106px}.mixer{gap:4px}.stem-name{font-size:8px}}
 </style>
 </head>
-<body><main class="app"><section class="device"><div class="brand">TE / YE — STEM LAB</div><div class="model">REMOTE CONTROL</div><div class="track">DONDA · 2021</div><section class="transport"><div class="status-row"><span id="status">READY</span><span id="time" class="time">00:00 / 00:00</span></div><input id="timeline" class="timeline" type="range" min="0" max="0" step="0.01" value="0" aria-label="Shared timeline"><div class="play-wrap"><button id="play" class="play" type="button">PLAY</button></div></section><section id="stems" class="mixer" aria-label="Stem controls"></section><div class="bottom"><button id="muteAll" class="hardware" type="button">MUTE ALL</button><button id="reset" class="hardware" type="button">RESET</button></div><div class="sample-wrap"><button id="sampleButton" class="sample" type="button">SAMPLE GLOBGLOGABGALAB</button></div><div id="error" class="error" role="alert"></div></section><div class="help">IF SOMETHING DOES NOT WORK, RELOAD THE PAGE</div></main>
+<body>
+<main class="app">
+  <section class="device">
+    <div class="brand">TE / YE — STEM LAB</div>
+    <div class="model">REMOTE CONTROL</div>
+    <div class="track">DONDA · 2021</div>
+
+    <section class="transport">
+      <div class="status-row">
+        <span id="status">READY</span>
+        <span id="time" class="time">00:00 / 00:00</span>
+      </div>
+      <input id="timeline" class="timeline" type="range" min="0" max="0" step="0.01" value="0" aria-label="Shared timeline">
+      <div class="play-wrap"><button id="play" class="play" type="button">PLAY</button></div>
+    </section>
+
+    <section id="stems" class="mixer" aria-label="Stem controls"></section>
+
+    <div class="bottom">
+      <button id="muteAll" class="hardware" type="button">MUTE ALL</button>
+      <button id="reset" class="hardware" type="button">RESET</button>
+    </div>
+
+    <div class="sample-wrap">
+      <button id="sampleButton" class="sample" type="button">SAMPLE GLOBGLOGABGALAB</button>
+    </div>
+
+    <div id="error" class="error" role="alert"></div>
+  </section>
+
+  <div class="help">IF SOMETHING DOES NOT WORK, RELOAD THE PAGE</div>
+</main>
+
 <script>
-(()=>{
-'use strict';
-const AUDIO_FILES={vocals:'Vocals.mp3',drums:'Drums.mp3',bass:'Bass.mp3',other:'Other.mp3'};
-const SAMPLE_FILE='Sample.mp3';
-const STEMS=[['vocals','VOC'],['drums','DRUM'],['bass','BASS'],['other','OTHER']];
-const audio={};const state={};let duration=0,isPlaying=false,seeking=false,raf=0,muteSnapshot=null,sample=null;
-const $=id=>document.getElementById(id);STEMS.forEach(([id])=>state[id]={volume:1,muted:false,solo:false});
-if(window.Telegram&&window.Telegram.WebApp){try{Telegram.WebApp.ready();Telegram.WebApp.expand()}catch(e){}}
-function fmt(n){n=Number.isFinite(n)?Math.max(0,n):0;const s=Math.floor(n);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
-function error(t){$('error').textContent=t;$('error').classList.add('show')}function clearError(){$('error').classList.remove('show')}
-function hasSolo(){return STEMS.some(([id])=>state[id].solo)}
-function applyMix(){const solo=hasSolo();STEMS.forEach(([id])=>{const s=state[id];audio[id].volume=(s.muted||(solo&&!s.solo))?0:s.volume})}
-function display(n){n=Math.max(0,Math.min(Number(n)||0,duration||0));$('timeline').value=String(n);$('time').textContent=fmt(n)+' / '+fmt(duration)}
-function seekAll(n){n=Math.max(0,Math.min(Number(n)||0,duration||0));STEMS.forEach(([id])=>{try{audio[id].currentTime=n}catch(e){}});display(n)}
-function render(){let html='';STEMS.forEach(([id,label])=>{html+=`<div class="stem"><div class="stem-name">${label}</div><input id="${id}Volume" class="stem-slider" type="range" min="0" max="1" step="0.01" value="1" aria-label="${label} volume"><div id="${id}Value" class="stem-value">100%</div><div class="stem-buttons"><button id="${id}Mute" class="hardware" type="button">MUTE</button><button id="${id}Solo" class="hardware" type="button">SOLO</button></div></div>`});$('stems').innerHTML=html;STEMS.forEach(([id])=>{const s=state[id];$(id+'Volume').addEventListener('input',e=>{s.volume=Number(e.target.value);$(id+'Value').textContent=Math.round(s.volume*100)+'%';applyMix()});$(id+'Mute').addEventListener('click',()=>{s.muted=!s.muted;$(id+'Mute').classList.toggle('muted',s.muted);$(id+'Mute').textContent=s.muted?'MUTED':'MUTE';applyMix()});$(id+'Solo').addEventListener('click',()=>{s.solo=!s.solo;$(id+'Solo').classList.toggle('active',s.solo);applyMix()})})}
-function stopClock(){if(raf)cancelAnimationFrame(raf);raf=0}function clock(){stopClock();const tick=()=>{if(!isPlaying)return;if(!seeking)display(audio.vocals.currentTime);if(!audio.vocals.paused)raf=requestAnimationFrame(tick)};raf=requestAnimationFrame(tick)}
-function pauseAll(){STEMS.forEach(([id])=>audio[id].pause());isPlaying=false;$('play').textContent='PLAY';$('status').textContent='PAUSED';stopClock()}
-function playAll(){const pos=audio.vocals.currentTime;STEMS.forEach(([id])=>{try{audio[id].currentTime=pos}catch(e){}});applyMix();const promises=STEMS.map(([id])=>audio[id].play());Promise.allSettled(promises).then(results=>{if(results.some(r=>r.status==='rejected')){pauseAll();error('Playback failed. Tap PLAY again.');return}isPlaying=true;$('play').textContent='PAUSE';$('status').textContent='PLAYING';clearError();clock()})}
-STEMS.forEach(([id])=>{const a=new Audio(AUDIO_FILES[id]);a.preload='auto';a.playsInline=true;a.setAttribute('playsinline','');audio[id]=a;a.addEventListener('loadedmetadata',()=>{if(id==='vocals')duration=a.duration;else duration=Math.max(duration,a.duration);$('timeline').max=String(duration);display(audio.vocals.currentTime)});a.addEventListener('error',()=>error('Could not load: '+AUDIO_FILES[id]));a.addEventListener('ended',()=>{if(id==='vocals'){pauseAll();seekAll(duration);$('status').textContent='ENDED'}})});
-function playSample(){if(!sample){sample=new Audio(SAMPLE_FILE);sample.preload='auto';sample.addEventListener('error',()=>error('Could not load: '+SAMPLE_FILE));sample.addEventListener('ended',()=>{$('sampleButton').classList.remove('active');$('sampleButton').textContent='SAMPLE GLOBGLOGABGALAB'})}if(sample.paused){sample.currentTime=0;sample.play().then(()=>{$('sampleButton').classList.add('active');$('sampleButton').textContent='SAMPLE · PLAYING'}).catch(()=>error('Sample playback was blocked. Tap again.'))}else{sample.pause();sample.currentTime=0;$('sampleButton').classList.remove('active');$('sampleButton').textContent='SAMPLE GLOBGLOGABGALAB'}}
-$('play').addEventListener('click',()=>isPlaying?pauseAll():playAll());$('timeline').addEventListener('pointerdown',()=>seeking=true);$('timeline').addEventListener('input',e=>{display(e.target.value);STEMS.forEach(([id])=>{try{audio[id].currentTime=Number(e.target.value)}catch(x){}})});['pointerup','change'].forEach(type=>$('timeline').addEventListener(type,()=>{seeking=false;seekAll($('timeline').value)}));$('sampleButton').addEventListener('click',playSample);
-$('muteAll').addEventListener('click',()=>{if(!muteSnapshot){muteSnapshot={};STEMS.forEach(([id])=>{muteSnapshot[id]=state[id].muted;state[id].muted=true;$(id+'Mute').classList.add('muted');$(id+'Mute').textContent='MUTED'});$('muteAll').textContent='UNMUTE'}else{STEMS.forEach(([id])=>{state[id].muted=!!muteSnapshot[id];$(id+'Mute').classList.toggle('muted',state[id].muted);$(id+'Mute').textContent=state[id].muted?'MUTED':'MUTE'});muteSnapshot=null;$('muteAll').textContent='MUTE ALL'}applyMix()});
-$('reset').addEventListener('click',()=>{pauseAll();STEMS.forEach(([id])=>{state[id]={volume:1,muted:false,solo:false};$(id+'Volume').value='1';$(id+'Value').textContent='100%';$(id+'Mute').className='hardware';$(id+'Mute').textContent='MUTE';$(id+'Solo').className='hardware'});muteSnapshot=null;$('muteAll').textContent='MUTE ALL';if(sample){sample.pause();sample.currentTime=0}$('sampleButton').className='sample';$('sampleButton').textContent='SAMPLE GLOBGLOGABGALAB';clearError();seekAll(0);$('status').textContent='READY';applyMix()});
-render();STEMS.forEach(([id])=>audio[id].volume=1);display(0);applyMix();
+(() => {
+  'use strict';
+
+  const AUDIO_FILES = {
+    vocals: 'Vocals.mp3',
+    drums: 'Drums.mp3',
+    bass: 'Bass.mp3',
+    other: 'Other.mp3'
+  };
+
+  const SAMPLE_FILE = 'Sample.mp3';
+  const STEMS = [['vocals','VOC'], ['drums','DRUM'], ['bass','BASS'], ['other','OTHER']];
+  const audio = {};
+  const state = {};
+  let duration = 0;
+  let isPlaying = false;
+  let seeking = false;
+  let raf = 0;
+  let muteSnapshot = null;
+  let sample = null;
+
+  const $ = id => document.getElementById(id);
+  STEMS.forEach(([id]) => {
+    state[id] = { volume: 1, muted: false, solo: false };
+  });
+
+  if (window.Telegram && window.Telegram.WebApp) {
+    try { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); } catch (e) {}
+  }
+
+  function fmt(n) {
+    n = Number.isFinite(n) ? Math.max(0, n) : 0;
+    const s = Math.floor(n);
+    return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+  }
+
+  function error(msg) {
+    const el = $('error');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  function clearError() {
+    $('error').classList.remove('show');
+  }
+
+  function hasSolo() {
+    return STEMS.some(([id]) => state[id].solo);
+  }
+
+  function applyMix() {
+    const solo = hasSolo();
+    STEMS.forEach(([id]) => {
+      const s = state[id];
+      const shouldMute = s.muted || (solo && !s.solo);
+      audio[id].volume = shouldMute ? 0 : s.volume;
+    });
+  }
+
+  function display(n) {
+    n = Math.max(0, Math.min(Number(n) || 0, duration || 0));
+    $('timeline').value = String(n);
+    $('time').textContent = fmt(n) + ' / ' + fmt(duration);
+  }
+
+  function seekAll(n) {
+    n = Math.max(0, Math.min(Number(n) || 0, duration || 0));
+    STEMS.forEach(([id]) => {
+      try { audio[id].currentTime = n; } catch (e) {}
+    });
+    display(n);
+  }
+
+  function render() {
+    let html = '';
+    STEMS.forEach(([id, label]) => {
+      html += `
+        <div class="stem">
+          <div class="stem-name">${label}</div>
+          <input id="${id}Volume" class="stem-slider" type="range" min="0" max="1" step="0.01" value="1" aria-label="${label} volume">
+          <div id="${id}Value" class="stem-value">100%</div>
+          <div class="stem-buttons">
+            <button id="${id}Solo" class="hardware" type="button">SOLO</button>
+          </div>
+        </div>
+      `;
+    });
+
+    $('stems').innerHTML = html;
+
+    STEMS.forEach(([id]) => {
+      const s = state[id];
+      const slider = $(id + 'Volume');
+      const soloBtn = $(id + 'Solo');
+
+      slider.addEventListener('input', (e) => {
+        s.volume = Number(e.target.value);
+        $(id + 'Value').textContent = Math.round(s.volume * 100) + '%';
+        applyMix();
+      });
+
+      soloBtn.addEventListener('click', () => {
+        s.solo = !s.solo;
+        soloBtn.classList.toggle('active', s.solo);
+        applyMix();
+      });
+    });
+  }
+
+  function stopClock() {
+    if (raf) cancelAnimationFrame(raf);
+    raf = 0;
+  }
+
+  function clock() {
+    stopClock();
+    const tick = () => {
+      if (!isPlaying) return;
+      if (!seeking) display(audio.vocals.currentTime);
+      if (!audio.vocals.paused) raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  }
+
+  function pauseAll() {
+    STEMS.forEach(([id]) => audio[id].pause());
+    isPlaying = false;
+    $('play').textContent = 'PLAY';
+    $('status').textContent = 'PAUSED';
+    stopClock();
+  }
+
+  function playAll() {
+    const pos = audio.vocals.currentTime;
+    STEMS.forEach(([id]) => {
+      try { audio[id].currentTime = pos; } catch (e) {}
+    });
+    applyMix();
+
+    const promises = STEMS.map(([id]) => audio[id].play());
+    Promise.allSettled(promises).then((results) => {
+      if (results.some(r => r.status === 'rejected')) {
+        pauseAll();
+        error('Playback failed. Tap PLAY again.');
+        return;
+      }
+      isPlaying = true;
+      $('play').textContent = 'PAUSE';
+      $('status').textContent = 'PLAYING';
+      clearError();
+      clock();
+    });
+  }
+
+  STEMS.forEach(([id]) => {
+    const a = new Audio(AUDIO_FILES[id]);
+    a.preload = 'auto';
+    a.playsInline = true;
+    a.setAttribute('playsinline', '');
+    audio[id] = a;
+
+    a.addEventListener('loadedmetadata', () => {
+      if (id === 'vocals') duration = a.duration;
+      else duration = Math.max(duration, a.duration || 0);
+      $('timeline').max = String(duration || 0);
+      display(audio.vocals.currentTime);
+    });
+
+    a.addEventListener('error', () => error('Could not load: ' + AUDIO_FILES[id]));
+    a.addEventListener('ended', () => {
+      if (id === 'vocals') {
+        pauseAll();
+        seekAll(duration);
+        $('status').textContent = 'ENDED';
+      }
+    });
+  });
+
+  function playSample() {
+    if (!sample) {
+      sample = new Audio(SAMPLE_FILE);
+      sample.preload = 'auto';
+      sample.addEventListener('error', () => error('Could not load: ' + SAMPLE_FILE));
+      sample.addEventListener('ended', () => {
+        $('sampleButton').classList.remove('active');
+        $('sampleButton').textContent = 'SAMPLE GLOBGLOGABGALAB';
+      });
+    }
+
+    if (sample.paused) {
+      sample.currentTime = 0;
+      sample.play().then(() => {
+        $('sampleButton').classList.add('active');
+        $('sampleButton').textContent = 'SAMPLE · PLAYING';
+      }).catch(() => error('Sample playback was blocked. Tap again.'));
+    } else {
+      sample.pause();
+      sample.currentTime = 0;
+      $('sampleButton').classList.remove('active');
+      $('sampleButton').textContent = 'SAMPLE GLOBGLOGABGALAB';
+    }
+  }
+
+  $('play').addEventListener('click', () => isPlaying ? pauseAll() : playAll());
+  $('sampleButton').addEventListener('click', playSample);
+
+  $('timeline').addEventListener('pointerdown', () => { seeking = true; });
+  $('timeline').addEventListener('input', (e) => {
+    display(e.target.value);
+    STEMS.forEach(([id]) => {
+      try { audio[id].currentTime = Number(e.target.value); } catch (err) {}
+    });
+  });
+  ['pointerup', 'change'].forEach((type) => {
+    $('timeline').addEventListener(type, () => {
+      seeking = false;
+      seekAll($('timeline').value);
+    });
+  });
+
+  $('muteAll').addEventListener('click', () => {
+    if (!muteSnapshot) {
+      muteSnapshot = {};
+      STEMS.forEach(([id]) => {
+        muteSnapshot[id] = state[id].muted;
+        state[id].muted = true;
+      });
+      $('muteAll').textContent = 'UNMUTE';
+    } else {
+      STEMS.forEach(([id]) => {
+        state[id].muted = !!muteSnapshot[id];
+      });
+      muteSnapshot = null;
+      $('muteAll').textContent = 'MUTE ALL';
+    }
+    applyMix();
+  });
+
+  $('reset').addEventListener('click', () => {
+    pauseAll();
+    STEMS.forEach(([id]) => {
+      state[id] = { volume: 1, muted: false, solo: false };
+      $(id + 'Volume').value = '1';
+      $(id + 'Value').textContent = '100%';
+      $(id + 'Solo').classList.remove('active');
+    });
+    muteSnapshot = null;
+    $('muteAll').textContent = 'MUTE ALL';
+    if (sample) {
+      sample.pause();
+      sample.currentTime = 0;
+    }
+    $('sampleButton').classList.remove('active');
+    $('sampleButton').textContent = 'SAMPLE GLOBGLOGABGALAB';
+    clearError();
+    seekAll(0);
+    $('status').textContent = 'READY';
+    applyMix();
+  });
+
+  render();
+  display(0);
+  applyMix();
 })();
-</script></body></html>
+</script>
+</body>
+</html>
