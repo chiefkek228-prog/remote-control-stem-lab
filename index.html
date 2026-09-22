@@ -333,6 +333,8 @@
       const SAMPLE_FILE = 'Sample.mp3';
       const audio = {};
       const state = {};
+      const gains = {};
+      let context = null;
       let duration = 0;
       let isPlaying = false;
       let seeking = false;
@@ -347,7 +349,10 @@
       });
 
       if (window.Telegram && window.Telegram.WebApp) {
-        try { window.Telegram.WebApp.ready(); window.Telegram.WebApp.expand(); } catch (_) {}
+        try {
+          window.Telegram.WebApp.ready();
+          window.Telegram.WebApp.expand();
+        } catch (_) {}
       }
 
       function formatTime(value) {
@@ -377,16 +382,63 @@
         return STEMS.some(stem => state[stem.id].solo);
       }
 
+      function ensureAudioContext() {
+        if (context) return;
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) {
+          showError('Web Audio is not supported in this browser.');
+          return;
+        }
+
+        context = new AudioCtx();
+
+        STEMS.forEach(stem => {
+          const element = new Audio(stem.id === 'vocals' ? 'Vocals.mp3' : stem.id === 'drums' ? 'Drums.mp3' : stem.id === 'bass' ? 'Bass.mp3' : 'Other.mp3');
+          element.preload = 'auto';
+          element.playsInline = true;
+          element.setAttribute('playsinline', 'true');
+          audio[stem.id] = element;
+
+          const source = context.createMediaElementSource(element);
+          const gain = context.createGain();
+          source.connect(gain);
+          gain.connect(context.destination);
+          gains[stem.id] = gain;
+
+          element.addEventListener('loadedmetadata', () => {
+            if (stem.id === 'vocals') duration = element.duration || 0;
+            else duration = Math.max(duration, element.duration || 0);
+            $('timeline').max = String(duration || 0);
+            updateDisplay(audio.vocals ? audio.vocals.currentTime : 0);
+          });
+
+          element.addEventListener('error', () => {
+            showError('Could not load: ' + (stem.id === 'vocals' ? 'Vocals.mp3' : stem.id === 'drums' ? 'Drums.mp3' : stem.id === 'bass' ? 'Bass.mp3' : 'Other.mp3'));
+          });
+
+          element.addEventListener('ended', () => {
+            if (stem.id === 'vocals') {
+              pauseAll();
+              seekAll(duration);
+              setStatus('ENDED');
+            }
+          });
+        });
+      }
+
       function applyMix() {
         const soloActive = anySolo();
 
         STEMS.forEach(stem => {
           const item = state[stem.id];
-          const el = audio[stem.id];
-          if (!el) return;
+          const gainNode = gains[stem.id];
+          if (!gainNode) return;
 
-          const shouldMute = globalMute || (soloActive && !item.solo);
-          el.volume = shouldMute ? 0 : item.volume;
+          let level = item.volume;
+          if (globalMute) level = 0;
+          else if (soloActive && !item.solo) level = 0;
+
+          gainNode.gain.value = level;
         });
       }
 
@@ -417,8 +469,12 @@
         stopAnimation();
         const tick = () => {
           if (!isPlaying) return;
-          if (!seeking) updateDisplay(audio.vocals.currentTime);
-          if (!audio.vocals.paused) rafId = requestAnimationFrame(tick);
+          if (!seeking) {
+            updateDisplay(audio.vocals.currentTime);
+          }
+          if (!audio.vocals.paused) {
+            rafId = requestAnimationFrame(tick);
+          }
         };
         rafId = requestAnimationFrame(tick);
       }
@@ -437,11 +493,15 @@
       }
 
       async function playAll() {
+        ensureAudioContext();
+        if (!context) return;
+
+        try {
+          if (context.state === 'suspended') await context.resume();
+        } catch (_) {}
+
         const master = audio.vocals;
-        if (!master) {
-          showError('Could not load: ' + FILES.vocals);
-          return;
-        }
+        if (!master) return;
 
         const position = master.currentTime || 0;
         STEMS.forEach(stem => {
@@ -452,12 +512,19 @@
 
         applyMix();
 
-        const result = await Promise.allSettled(
-          STEMS.map(stem => audio[stem.id].play().catch(() => Promise.resolve()))
-        );
+        let anyFailure = false;
 
-        const failed = result.some(item => item.status === 'rejected');
-        if (failed) {
+        for (const stem of STEMS) {
+          const el = audio[stem.id];
+          if (!el) continue;
+          try {
+            await el.play();
+          } catch (_) {
+            anyFailure = true;
+          }
+        }
+
+        if (anyFailure) {
           pauseAll();
           showError('Playback failed. Tap PLAY again.');
           return;
@@ -511,39 +578,6 @@
         });
       }
 
-      function createAudioElements() {
-        STEMS.forEach(stem => {
-          const el = new Audio();
-          el.src = FILES[stem.id];
-          el.preload = 'auto';
-          el.playsInline = true;
-          el.setAttribute('playsinline', 'true');
-          audio[stem.id] = el;
-
-          el.addEventListener('loadedmetadata', () => {
-            if (stem.id === 'vocals') {
-              duration = el.duration || 0;
-            } else {
-              duration = Math.max(duration, el.duration || 0);
-            }
-            $('timeline').max = String(duration || 0);
-            updateDisplay(audio.vocals ? audio.vocals.currentTime : 0);
-          });
-
-          el.addEventListener('error', () => {
-            showError('Could not load: ' + FILES[stem.id]);
-          });
-
-          el.addEventListener('ended', () => {
-            if (stem.id === 'vocals') {
-              pauseAll();
-              seekAll(duration);
-              setStatus('ENDED');
-            }
-          });
-        });
-      }
-
       function playSample() {
         if (!sampleAudio) {
           sampleAudio = new Audio(SAMPLE_FILE);
@@ -583,6 +617,7 @@
 
       function resetAll() {
         pauseAll();
+
         globalMute = false;
         $('muteAll').textContent = 'MUTE ALL';
 
@@ -600,10 +635,9 @@
         if (sampleAudio) {
           sampleAudio.pause();
           sampleAudio.currentTime = 0;
+          $('sampleButton').classList.remove('active');
+          $('sampleButton').textContent = 'SAMPLE GLOBGLOGABGALAB';
         }
-
-        $('sampleButton').classList.remove('active');
-        $('sampleButton').textContent = 'SAMPLE GLOBGLOGABGALAB';
 
         clearError();
         seekAll(0);
@@ -612,7 +646,11 @@
       }
 
       function bindEvents() {
-        $('play').addEventListener('click', () => isPlaying ? pauseAll() : playAll());
+        $('play').addEventListener('click', () => {
+          if (isPlaying) pauseAll();
+          else playAll();
+        });
+
         $('sampleButton').addEventListener('click', playSample);
         $('muteAll').addEventListener('click', muteAllToggle);
         $('reset').addEventListener('click', resetAll);
@@ -621,6 +659,7 @@
         $('timeline').addEventListener('input', (event) => {
           const next = Number(event.target.value);
           updateDisplay(next);
+
           STEMS.forEach(stem => {
             const el = audio[stem.id];
             if (!el) return;
@@ -637,7 +676,6 @@
       }
 
       renderMixer();
-      createAudioElements();
       bindEvents();
       updateDisplay(0);
       applyMix();
