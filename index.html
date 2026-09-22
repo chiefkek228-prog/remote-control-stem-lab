@@ -7,125 +7,46 @@
 <title>REMOTE CONTROL — STEM LAB</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{--bg:#090909;--panel:#131313;--line:#303030;--text:#f5f5f5;--muted:#909090;--white:#eee}
-*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none}html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}body{padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom))}.app{width:min(760px,100%);margin:auto}.header{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px}.eyebrow,.sub{color:var(--muted);font-size:11px;letter-spacing:.16em;text-transform:uppercase}.eyebrow{margin-bottom:8px}h1{font-size:clamp(34px,9vw,64px);line-height:.88;letter-spacing:-.07em;margin:0}.sub{margin-top:10px}.row{display:flex;justify-content:space-between;align-items:center;gap:12px}.status,.time{font-size:11px;letter-spacing:.12em;color:var(--muted);font-variant-numeric:tabular-nums}.status.playing{color:var(--text)}.status.ready{color:#ccc}.timeline{width:100%;height:34px;margin:8px 0 12px}input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:28px;background:transparent;touch-action:pan-y;cursor:pointer}input[type=range]::-webkit-slider-runnable-track{height:3px;background:#404040;border-radius:3px}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border:0;border-radius:50%;background:#f5f5f5;margin-top:-7.5px}input[type=range]::-moz-range-track{height:3px;background:#404040}input[type=range]::-moz-range-thumb{width:18px;height:18px;border:0;border-radius:50%;background:#f5f5f5}.button{min-height:48px;border:1px solid var(--line);border-radius:9px;background:#171717;color:var(--text);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:0 12px}.button.primary{background:var(--white);color:#080808;border-color:var(--white)}.transport{margin-bottom:16px}.stem-list{display:grid;gap:9px}.stem{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}.stem-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;gap:8px}.name{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}.percent{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}.stem-controls{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px}.small{min-height:38px;min-width:58px;border:1px solid var(--line);border-radius:8px;background:#1a1a1a;color:var(--text);font-size:9px;font-weight:700;letter-spacing:.1em;text-transform:uppercase}.small.active{background:var(--white);color:#080808;border-color:var(--white)}.small.muted{background:#303030}.bottom{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.error{display:none;margin-top:12px;padding:10px;border:1px solid var(--line);border-radius:8px;color:#ddd;font-size:11px;line-height:1.45}.error.show{display:block}.note{text-align:center;color:#555;font-size:10px;letter-spacing:.12em;margin-top:12px;text-transform:uppercase}@media(max-width:360px){.small{min-width:52px;padding:0 6px}.name{font-size:11px}}
+:root{--bg:#090909;--panel:#151515;--line:#333;--text:#f4f4f4;--muted:#999;--on:#eee}*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}body{padding:max(14px,env(safe-area-inset-top)) 14px max(14px,env(safe-area-inset-bottom))}.app{width:min(760px,100%);margin:auto}.header{border-bottom:1px solid var(--line);padding-bottom:14px;margin-bottom:16px}.eyebrow,.sub{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}.eyebrow{margin-bottom:8px}h1{margin:0;font-size:clamp(34px,9vw,64px);line-height:.88;letter-spacing:-.07em}.sub{margin-top:10px}.top{display:flex;justify-content:space-between;gap:12px;color:var(--muted);font-size:11px;letter-spacing:.12em}.time{font-variant-numeric:tabular-nums;white-space:nowrap}.status.playing{color:var(--text)}#timeline{display:block;width:100%;height:38px;margin:5px 0 12px}.transport{margin-bottom:16px}.button,.mini{border:1px solid var(--line);border-radius:9px;background:#181818;color:var(--text);font-weight:700;letter-spacing:.12em;text-transform:uppercase;cursor:pointer}.button{width:100%;min-height:48px;font-size:11px}.button.primary{background:var(--on);border-color:var(--on);color:#070707}.stems{display:grid;gap:9px}.stem{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px}.stem-head{display:flex;justify-content:space-between;gap:8px;margin-bottom:8px}.label{font-size:12px;font-weight:700;letter-spacing:.1em;white-space:nowrap}.value{color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}.stem-controls{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:8px}.volume{width:100%;height:36px}.mini{min-width:62px;min-height:40px;padding:0 7px;font-size:9px}.mini.active{background:var(--on);border-color:var(--on);color:#070707}.mini.muted{background:#333}.bottom{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.error{display:none;margin-top:12px;border:1px solid var(--line);border-radius:8px;padding:10px;color:#ddd;font-size:11px;line-height:1.45}.error.show{display:block}.note{text-align:center;color:#555;font-size:10px;letter-spacing:.12em;margin-top:12px;text-transform:uppercase}input[type=range]{-webkit-appearance:none;appearance:none;background:transparent;touch-action:pan-y;cursor:pointer}input[type=range]::-webkit-slider-runnable-track{height:3px;background:#4a4a4a;border-radius:3px}input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:20px;height:20px;border:0;border-radius:50%;background:#f5f5f5;margin-top:-8.5px}input[type=range]::-moz-range-track{height:3px;background:#4a4a4a}input[type=range]::-moz-range-thumb{width:20px;height:20px;border:0;border-radius:50%;background:#f5f5f5}@media(max-width:360px){.mini{min-width:55px;padding:0 5px}.label{font-size:11px}}
 </style>
 </head>
 <body>
 <main class="app">
 <header class="header"><div class="eyebrow">YE / DONDA</div><h1>REMOTE CONTROL</h1><div class="sub">STEM LAB · REMOTE CONTROL — 2021</div></header>
-<section aria-label="Transport"><div class="row"><div id="status" class="status ready">READY</div><div id="time" class="time">00:00 / 00:00</div></div><input id="timeline" class="timeline" type="range" min="0" max="0" step="0.01" value="0" aria-label="Shared timeline"><div class="transport"><button id="play" class="button primary" type="button">PLAY</button></div></section>
-<section id="stems" class="stem-list" aria-label="Stem controls"></section>
+<section><div class="top"><span id="status">READY</span><span id="time" class="time">00:00 / 00:00</span></div><input id="timeline" type="range" min="0" max="0" step="0.01" value="0" aria-label="Shared timeline"><div class="transport"><button id="play" class="button primary" type="button">PLAY</button></div></section>
+<section id="stems" class="stems" aria-label="Stem controls"></section>
 <div class="bottom"><button id="muteAll" class="button" type="button">MUTE ALL</button><button id="reset" class="button" type="button">RESET</button></div>
 <div id="error" class="error" role="alert"></div><div class="note">4-STEM SYNCHRONIZED PLAYER</div>
 </main>
 <script>
 (() => {
-  'use strict';
-
-  // Change filenames here only. These are the exact files in this repository.
-  const AUDIO_FILES = {
-    vocals: 'Vocals.mp3',
-    drums: 'Drums.mp3',
-    bass: 'Bass.mp3',
-    other: 'Other.mp3'
-  };
-
-  const STEMS = [
-    {key:'vocals', name:'🎤 VOCALS'}, {key:'drums', name:'🥁 DRUMS'},
-    {key:'bass', name:'🔊 BASS'}, {key:'other', name:'🎹 OTHER'}
-  ];
-  const tg = window.Telegram && window.Telegram.WebApp;
-  if (tg) { try { tg.ready(); tg.expand(); } catch (_) {} }
-
-  const audio = {};
-  const mix = {};
-  let duration = 0, playing = false, seeking = false, raf = 0;
-  let muteSnapshot = null, allMuted = false;
-  const $ = id => document.getElementById(id);
-
-  STEMS.forEach(s => { mix[s.key] = {volume:1, muted:false, solo:false}; });
-
-  function fmt(n) { n = Number.isFinite(n) ? Math.max(0,n) : 0; const x=Math.floor(n); return String(Math.floor(x/60)).padStart(2,'0')+':'+String(x%60).padStart(2,'0'); }
-  function status(text, cls='') { $('status').textContent=text; $('status').className='status '+cls; }
-  function error(text) { $('error').textContent=text; $('error').classList.add('show'); }
-  function clearError() { $('error').textContent=''; $('error').classList.remove('show'); }
-  function solosOn() { return STEMS.some(s => mix[s.key].solo); }
-
-  function applyMix() {
-    const solo = solosOn();
-    STEMS.forEach(s => {
-      const m = mix[s.key];
-      if (audio[s.key]) audio[s.key].volume = m.muted || (solo && !m.solo) ? 0 : m.volume;
-    });
-  }
-
-  function displayTime(n) {
-    n = Math.max(0, Math.min(Number(n)||0, duration||0));
-    $('timeline').value = String(n);
-    $('time').textContent = fmt(n)+' / '+fmt(duration);
-  }
-
-  function seekAll(n) {
-    n = Math.max(0, Math.min(Number(n)||0, duration||0));
-    STEMS.forEach(s => { if (audio[s.key]) { try { audio[s.key].currentTime=n; } catch (_) {} } });
-    displayTime(n);
-  }
-
-  function render() {
-    $('stems').innerHTML = STEMS.map(s => `<article class="stem"><div class="stem-head"><div class="name">${s.name}</div><div id="${s.key}Percent" class="percent">100%</div></div><div class="stem-controls"><input id="${s.key}Volume" type="range" min="0" max="1" step="0.01" value="1" aria-label="${s.name} volume"><button id="${s.key}Mute" class="small" type="button">MUTE</button><button id="${s.key}Solo" class="small" type="button">SOLO</button></div></article>`).join('');
-    STEMS.forEach(s => {
-      const m=mix[s.key];
-      $(s.key+'Volume').addEventListener('input', e => { m.volume=Number(e.target.value); $(s.key+'Percent').textContent=Math.round(m.volume*100)+'%'; applyMix(); });
-      $(s.key+'Mute').addEventListener('click', () => { m.muted=!m.muted; const b=$(s.key+'Mute'); b.classList.toggle('muted',m.muted); b.textContent=m.muted?'MUTED':'MUTE'; applyMix(); });
-      $(s.key+'Solo').addEventListener('click', () => { m.solo=!m.solo; $(s.key+'Solo').classList.toggle('active',m.solo); applyMix(); });
-    });
-  }
-
-  function stopClock() { if (raf) cancelAnimationFrame(raf); raf=0; }
-  function clock() { stopClock(); const tick=()=>{ if(!playing)return; if(!seeking)displayTime(audio.vocals.currentTime); if(!audio.vocals.paused)raf=requestAnimationFrame(tick); }; raf=requestAnimationFrame(tick); }
-
-  function pauseAll() { STEMS.forEach(s => audio[s.key] && audio[s.key].pause()); playing=false; $('play').textContent='PLAY'; status('PAUSED'); stopClock(); }
-
-  function playAll() {
-    if (!audio.vocals) return error('Could not load: '+AUDIO_FILES.vocals);
-    const position=audio.vocals.currentTime;
-    STEMS.forEach(s=>{if(audio[s.key])try{audio[s.key].currentTime=position}catch(_) {}});
-    applyMix();
-    // Start every element from the same user click. Do not await one before starting another.
-    const attempts=STEMS.map(s=>audio[s.key] ? audio[s.key].play() : Promise.reject(new Error(s.key)));
-    Promise.allSettled(attempts).then(results=>{
-      const failed=results.findIndex(r=>r.status==='rejected');
-      if(failed!==-1){ pauseAll(); error('Could not start: '+STEMS[failed].name+' ('+AUDIO_FILES[STEMS[failed].key]+')'); return; }
-      clearError(); playing=true; $('play').textContent='PAUSE'; status('PLAYING','playing'); clock();
-    });
-  }
-
-  function createAudio() {
-    STEMS.forEach(s=>{
-      const a=new Audio(AUDIO_FILES[s.key]); a.preload='auto'; a.playsInline=true; a.setAttribute('playsinline',''); audio[s.key]=a;
-      a.addEventListener('loadedmetadata',()=>{ if(s.key==='vocals' || !duration){duration=s.key==='vocals'?a.duration:Math.max(duration,a.duration); $('timeline').max=String(duration); displayTime(audio.vocals.currentTime||0);} });
-      a.addEventListener('error',()=>error('Could not load: '+AUDIO_FILES[s.key]));
-      a.addEventListener('play',()=>{if(s.key!=='vocals' && audio.vocals && Math.abs(a.currentTime-audio.vocals.currentTime)>.05)try{a.currentTime=audio.vocals.currentTime}catch(_) {}});
-      a.addEventListener('ended',()=>{if(s.key==='vocals'){pauseAll();seekAll(duration);status('ENDED');}});
-    });
-  }
-
-  $('play').addEventListener('click',()=>playing?pauseAll():playAll());
-  $('timeline').addEventListener('pointerdown',()=>seeking=true);
-  $('timeline').addEventListener('input',()=>{const n=Number($('timeline').value); displayTime(n); STEMS.forEach(s=>{if(audio[s.key])try{audio[s.key].currentTime=n}catch(_) {}});});
-  $('timeline').addEventListener('change',()=>{seeking=false;seekAll($('timeline').value);});
-  $('timeline').addEventListener('pointerup',()=>{seeking=false;seekAll($('timeline').value);});
-
-  $('muteAll').addEventListener('click',()=>{
-    if(!allMuted){ muteSnapshot={}; STEMS.forEach(s=>{muteSnapshot[s.key]=mix[s.key].muted;mix[s.key].muted=true;$(s.key+'Mute').classList.add('muted');$(s.key+'Mute').textContent='MUTED';}); allMuted=true; $('muteAll').textContent='UNMUTE ALL'; }
-    else { STEMS.forEach(s=>{mix[s.key].muted=muteSnapshot?.[s.key]||false;$(s.key+'Mute').classList.toggle('muted',mix[s.key].muted);$(s.key+'Mute').textContent=mix[s.key].muted?'MUTED':'MUTE';}); allMuted=false; $('muteAll').textContent='MUTE ALL'; }
-    applyMix();
-  });
-
-  $('reset').addEventListener('click',()=>{pauseAll();STEMS.forEach(s=>{mix[s.key]={volume:1,muted:false,solo:false};$(s.key+'Volume').value=1;$(s.key+'Percent').textContent='100%';$(s.key+'Mute').className='small';$(s.key+'Mute').textContent='MUTE';$(s.key+'Solo').className='small';});allMuted=false;muteSnapshot=null;$('muteAll').textContent='MUTE ALL';clearError();seekAll(0);status('READY','ready');applyMix();});
-
-  render(); createAudio(); displayTime(0); applyMix();
+'use strict';
+const AUDIO_FILES={vocals:'Vocals.mp3',drums:'Drums.mp3',bass:'Bass.mp3',other:'Other.mp3'};
+const STEMS=[['vocals','🎤 VOCALS'],['drums','🥁 DRUMS'],['bass','🔊 BASS'],['other','🎹 OTHER']];
+const audio={},state={};let duration=0,playing=false,raf=0,seeking=false,allMuted=false,snapshot={};
+const $=id=>document.getElementById(id);
+STEMS.forEach(([id])=>state[id]={volume:1,muted:false,solo:false});
+const tg=window.Telegram&&window.Telegram.WebApp;if(tg){try{tg.ready();tg.expand()}catch(e){}}
+function fmt(n){n=Number.isFinite(n)?Math.max(0,n):0;const s=Math.floor(n);return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')}
+function showError(t){$('error').textContent=t;$('error').classList.add('show')}
+function clearError(){$('error').textContent='';$('error').classList.remove('show')}
+function setStatus(t,c=''){$('status').textContent=t;$('status').className=c}
+function hasSolo(){return STEMS.some(([id])=>state[id].solo)}
+function applyMix(){const solo=hasSolo();STEMS.forEach(([id])=>{const s=state[id];if(audio[id])audio[id].volume=(s.muted||(solo&&!s.solo))?0:s.volume})}
+function display(n){n=Math.max(0,Math.min(Number(n)||0,duration||0));$('timeline').value=n;$('time').textContent=fmt(n)+' / '+fmt(duration)}
+function seek(n){n=Math.max(0,Math.min(Number(n)||0,duration||0));STEMS.forEach(([id])=>{try{audio[id].currentTime=n}catch(e){}});display(n)}
+function render(){ $('stems').innerHTML=STEMS.map(([id,label])=>`<article class="stem"><div class="stem-head"><span class="label">${label}</span><span id="${id}-value" class="value">100%</span></div><div class="stem-controls"><input id="${id}-volume" class="volume" data-id="${id}" type="range" min="0" max="1" step="0.01" value="1" aria-label="${label} volume"><button class="mini" data-action="mute" data-id="${id}" type="button">MUTE</button><button class="mini" data-action="solo" data-id="${id}" type="button">SOLO</button></div></article>`).join('') }
+$('stems').addEventListener('input',e=>{if(!e.target.matches('.volume'))return;const id=e.target.dataset.id;state[id].volume=Number(e.target.value);$(`${id}-value`).textContent=Math.round(state[id].volume*100)+'%';applyMix()});
+$('stems').addEventListener('click',e=>{const b=e.target.closest('button[data-id]');if(!b)return;const id=b.dataset.id;if(b.dataset.action==='mute'){state[id].muted=!state[id].muted;b.classList.toggle('muted',state[id].muted);b.textContent=state[id].muted?'MUTED':'MUTE'}else{state[id].solo=!state[id].solo;b.classList.toggle('active',state[id].solo)}applyMix()});
+function stopClock(){cancelAnimationFrame(raf);raf=0}
+function clock(){stopClock();const tick=()=>{if(!playing)return;if(!seeking)display(audio.vocals.currentTime);if(!audio.vocals.paused)raf=requestAnimationFrame(tick)};raf=requestAnimationFrame(tick)}
+function pause(){STEMS.forEach(([id])=>audio[id].pause());playing=false;$('play').textContent='PLAY';setStatus('PAUSED');stopClock()}
+function play(){const pos=audio.vocals.currentTime;STEMS.forEach(([id])=>{try{audio[id].currentTime=pos}catch(e){}});applyMix();const promises=STEMS.map(([id])=>audio[id].play());Promise.all(promises).then(()=>{playing=true;$('play').textContent='PAUSE';setStatus('PLAYING','playing');clearError();clock()}).catch(e=>{pause();showError('Playback failed. Check that all four MP3 files are loaded.')})}
+STEMS.forEach(([id])=>{const a=new Audio();a.src=AUDIO_FILES[id];a.preload='auto';a.playsInline=true;a.setAttribute('playsinline','');audio[id]=a;a.addEventListener('loadedmetadata',()=>{if(id==='vocals')duration=a.duration;else duration=Math.max(duration,a.duration);$('timeline').max=duration;display(audio.vocals.currentTime)});a.addEventListener('error',()=>showError('Could not load: '+AUDIO_FILES[id]));a.addEventListener('ended',()=>{if(id==='vocals'){pause();seek(duration);setStatus('ENDED')}})});
+$('play').addEventListener('click',()=>playing?pause():play());$('timeline').addEventListener('pointerdown',()=>seeking=true);$('timeline').addEventListener('input',e=>{display(e.target.value);STEMS.forEach(([id])=>{try{audio[id].currentTime=Number(e.target.value)}catch(x){}})});['pointerup','change'].forEach(ev=>$('timeline').addEventListener(ev,()=>{seeking=false;seek($('timeline').value)}));
+$('muteAll').addEventListener('click',()=>{if(!allMuted){STEMS.forEach(([id])=>{snapshot[id]=state[id].muted;state[id].muted=true;const b=document.querySelector(`[data-action="mute"][data-id="${id}"]`);b.classList.add('muted');b.textContent='MUTED'});allMuted=true;$('muteAll').textContent='UNMUTE ALL'}else{STEMS.forEach(([id])=>{state[id].muted=!!snapshot[id];const b=document.querySelector(`[data-action="mute"][data-id="${id}"]`);b.classList.toggle('muted',state[id].muted);b.textContent=state[id].muted?'MUTED':'MUTE'});allMuted=false;$('muteAll').textContent='MUTE ALL'}applyMix()});
+$('reset').addEventListener('click',()=>{pause();STEMS.forEach(([id])=>{state[id]={volume:1,muted:false,solo:false};$(`${id}-volume`).value=1;$(`${id}-value`).textContent='100%';document.querySelector(`[data-action="mute"][data-id="${id}"]`).className='mini';document.querySelector(`[data-action="solo"][data-id="${id}"]`).className='mini'});allMuted=false;$('muteAll').textContent='MUTE ALL';clearError();seek(0);setStatus('READY','ready');applyMix()});
+render();display(0);applyMix();
 })();
 </script>
 </body>
